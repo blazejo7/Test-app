@@ -6,6 +6,7 @@ import {
   isVanClaimable,
   lockExpiryFrom,
   LOCK_DURATION_MINUTES,
+  minutesRemaining,
 } from './rules';
 
 describe('evaluateFluidLevels', () => {
@@ -66,5 +67,17 @@ describe('lockExpiryFrom', () => {
     const lockedAt = new Date('2026-06-13T12:00:00Z');
     const expiry = lockExpiryFrom(lockedAt);
     expect(expiry.getTime() - lockedAt.getTime()).toBe(LOCK_DURATION_MINUTES * 60_000);
+  });
+});
+
+describe('minutesRemaining', () => {
+  const now = new Date('2026-06-13T12:00:00Z');
+
+  it('rounds up minutes left', () => {
+    expect(minutesRemaining('2026-06-13T12:09:30Z', now)).toBe(10);
+  });
+
+  it('clamps to 0 once expired', () => {
+    expect(minutesRemaining('2026-06-13T11:50:00Z', now)).toBe(0);
   });
 });

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
 import type { Van, VanLock } from '@/types/database';
@@ -61,4 +61,23 @@ export function useVans() {
   }, []);
 
   return query;
+}
+
+/** Release a lock the current user holds (RLS permits own lock or manager). */
+export async function releaseVan(vanId: string): Promise<void> {
+  const { error } = await supabase.from('van_locks').delete().eq('van_id', vanId);
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * A clock that re-renders on an interval so relative times (lock countdowns)
+ * stay fresh without a server round-trip. Defaults to every 30s.
+ */
+export function useNow(intervalMs = 30_000): Date {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return now;
 }

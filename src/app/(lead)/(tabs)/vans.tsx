@@ -16,8 +16,8 @@ import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
 import { claimVan } from '@/lib/inspection';
-import { isVanClaimable } from '@/lib/rules';
-import { useVans, type VanWithLock } from '@/lib/vans';
+import { isLockExpired, minutesRemaining } from '@/lib/rules';
+import { releaseVan, useNow, useVans, type VanWithLock } from '@/lib/vans';
 import type { VanStatus } from '@/types/database';
 
 const STATUS_META: Record<VanStatus, { label: string; color: string }> = {
@@ -39,15 +39,23 @@ function StatusPill({ status }: { status: VanStatus }) {
 
 function VanRow({
   van,
+  currentUserId,
+  now,
   onClaim,
-  claiming,
+  onRelease,
+  busy,
 }: {
   van: VanWithLock;
+  currentUserId: string | undefined;
+  now: Date;
   onClaim: (vanId: string) => void;
-  claiming: boolean;
+  onRelease: (vanId: string) => void;
+  busy: boolean;
 }) {
-  const claimable = isVanClaimable(van.lock);
-  const locked = !claimable && van.lock;
+  const activeLock = van.lock && !isLockExpired(van.lock, now) ? van.lock : null;
+  const heldByMe = activeLock?.locked_by === currentUserId;
+  const lockedByOther = !!activeLock && !heldByMe;
+  const minsLeft = activeLock ? minutesRemaining(activeLock.expires_at, now) : 0;
 
   return (
     <View style={styles.row}>
@@ -56,27 +64,45 @@ function VanRow({
         <ThemedText type="small" themeColor="textSecondary">
           {van.make} {van.model}
         </ThemedText>
-        {locked ? (
+        {heldByMe ? (
+          <ThemedText type="small" style={styles.heldText}>
+            Held by you · {minsLeft}m left
+          </ThemedText>
+        ) : lockedByOther ? (
           <ThemedText type="small" style={styles.lockedText}>
-            Claimed — locked until {new Date(van.lock!.expires_at).toLocaleTimeString()}
+            Claimed by another lead · {minsLeft}m left
           </ThemedText>
         ) : null}
       </View>
+
       <View style={styles.rowRight}>
         <StatusPill status={van.status} />
-        <TouchableOpacity
-          style={[styles.claimBtn, (!claimable || claiming) && styles.claimBtnDisabled]}
-          disabled={!claimable || claiming}
-          onPress={() => onClaim(van.id)}
-        >
-          {claiming ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
+        {busy ? (
+          <ActivityIndicator size="small" />
+        ) : heldByMe ? (
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.claimBtn} onPress={() => onClaim(van.id)}>
+              <ThemedText type="small" style={styles.claimText}>
+                Resume
+              </ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.releaseBtn} onPress={() => onRelease(van.id)}>
+              <ThemedText type="small" style={styles.releaseText}>
+                Release
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[styles.claimBtn, lockedByOther && styles.claimBtnDisabled]}
+            disabled={lockedByOther}
+            onPress={() => onClaim(van.id)}
+          >
             <ThemedText type="small" style={styles.claimText}>
-              {claimable ? 'Claim' : 'Locked'}
+              {lockedByOther ? 'Locked' : 'Claim'}
             </ThemedText>
-          )}
-        </TouchableOpacity>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -86,10 +112,11 @@ export default function Vans() {
   const { profile, signOut } = useAuth();
   const { data, isLoading, isError, error, refetch, isRefetching } = useVans();
   const queryClient = useQueryClient();
-  const [claimingId, setClaimingId] = useState<string | null>(null);
+  const now = useNow();
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   async function handleClaim(vanId: string) {
-    setClaimingId(vanId);
+    setBusyId(vanId);
     try {
       const inspectionId = await claimVan(vanId);
       await queryClient.invalidateQueries({ queryKey: ['vans'] });
@@ -97,7 +124,19 @@ export default function Vans() {
     } catch (e) {
       Alert.alert('Could not claim van', e instanceof Error ? e.message : 'Unknown error');
     } finally {
-      setClaimingId(null);
+      setBusyId(null);
+    }
+  }
+
+  async function handleRelease(vanId: string) {
+    setBusyId(vanId);
+    try {
+      await releaseVan(vanId);
+      await queryClient.invalidateQueries({ queryKey: ['vans'] });
+    } catch (e) {
+      Alert.alert('Could not release van', e instanceof Error ? e.message : 'Unknown error');
+    } finally {
+      setBusyId(null);
     }
   }
 
@@ -134,12 +173,17 @@ export default function Vans() {
           data={data}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <VanRow van={item} onClaim={handleClaim} claiming={claimingId === item.id} />
+            <VanRow
+              van={item}
+              currentUserId={profile?.id}
+              now={now}
+              onClaim={handleClaim}
+              onRelease={handleRelease}
+              busy={busyId === item.id}
+            />
           )}
           contentContainerStyle={styles.list}
-          refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-          }
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
           ListEmptyComponent={
             <View style={styles.center}>
               <ThemedText type="small" themeColor="textSecondary">
@@ -174,6 +218,8 @@ const styles = StyleSheet.create({
   },
   rowMain: { gap: 2, flexShrink: 1 },
   rowRight: { alignItems: 'flex-end', gap: Spacing.two },
+  actions: { flexDirection: 'row', gap: Spacing.two },
+  heldText: { color: '#12B76A' },
   lockedText: { color: '#F79009' },
   pill: { borderRadius: 999, paddingHorizontal: Spacing.two, paddingVertical: 2 },
   pillText: { color: '#fff', fontSize: 12 },
@@ -185,5 +231,13 @@ const styles = StyleSheet.create({
   },
   claimBtnDisabled: { backgroundColor: Colors.light.backgroundSelected },
   claimText: { color: '#fff' },
+  releaseBtn: {
+    borderRadius: 8,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one,
+    borderWidth: 1,
+    borderColor: Colors.light.backgroundSelected,
+  },
+  releaseText: { color: '#D92D20' },
   error: { color: '#D92D20' },
 });

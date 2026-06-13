@@ -86,3 +86,12 @@ export function isVanClaimable(
 export function lockExpiryFrom(lockedAt: Date): Date {
   return new Date(lockedAt.getTime() + LOCK_DURATION_MINUTES * 60_000);
 }
+
+/**
+ * Whole minutes remaining until `expiresAt`, clamped at 0. Used for the lock
+ * countdown banner. Pass `now` for testability.
+ */
+export function minutesRemaining(expiresAt: string, now: Date = new Date()): number {
+  const ms = new Date(expiresAt).getTime() - now.getTime();
+  return Math.max(0, Math.ceil(ms / 60_000));
+}

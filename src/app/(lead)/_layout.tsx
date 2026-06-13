@@ -8,6 +8,7 @@ export default function LeadLayout() {
         name="inspection/[id]"
         options={{ presentation: 'modal', gestureEnabled: false }}
       />
+      <Stack.Screen name="damage/[id]" options={{ presentation: 'card' }} />
     </Stack>
   );
 }

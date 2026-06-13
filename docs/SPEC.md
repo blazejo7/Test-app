@@ -83,9 +83,11 @@ Every table carries `fleet_id`, `created_at`, `updated_at`. RLS is enabled on al
    damage + photos → fluids (thresholds) → review → submit (`submit_inspection`
    RPC: writes damage/confirmations, sets result + `completed_at`, releases lock,
    all in one transaction).
-4. **Real-time locking** — partly built (claim takes a lock, van list shows live
-   lock state). Remaining: explicit release UX + an expiry countdown banner.
-5. **Damage log** — new vs known views, photo gallery, per-van history.
+4. **Real-time locking** — ✅ built. Van list subscribes to `van_locks` realtime;
+   shows held-by-you vs claimed-by-another with a live minutes-left countdown;
+   explicit Release (RLS-guarded to owner/manager) and Resume.
+5. **Damage log** — ✅ built. Filterable list (all/new/known/resolved), per-report
+   detail with photo gallery (signed URLs) and confirmation history.
 6. **Manager dashboard** — live session progress, lead activity, grounded sign-off
    queue (writes `notifications`).
 7. **Daily session + summary report** — auto-generated end-of-session summary
