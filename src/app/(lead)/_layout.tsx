@@ -1,18 +1,13 @@
-import { Tabs } from 'expo-router';
-
-import { Colors } from '@/constants/theme';
+import { Stack } from 'expo-router';
 
 export default function LeadLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: '#208AEF',
-        headerStyle: { backgroundColor: Colors.light.background },
-      }}
-    >
-      <Tabs.Screen name="vans" options={{ title: 'Vans' }} />
-      <Tabs.Screen name="inspect" options={{ title: 'Inspect' }} />
-      <Tabs.Screen name="damage" options={{ title: 'Damage' }} />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen
+        name="inspection/[id]"
+        options={{ presentation: 'modal', gestureEnabled: false }}
+      />
+    </Stack>
   );
 }

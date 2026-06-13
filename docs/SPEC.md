@@ -78,11 +78,13 @@ Every table carries `fleet_id`, `created_at`, `updated_at`. RLS is enabled on al
 
 1. **Auth & roles** — ✅ scaffold: login + role-based navigation.
 2. **Van registry** — ✅ scaffold: live list with lock state.
-3. **Inspection flow** — claim (conditional lock upsert) → confirm known damage
-   (`damage_confirmations`) → zone walkaround → log new damage + photos → fluids
-   (thresholds) → review → submit (sets `completed_at`, runs severity→status).
-4. **Real-time locking** — extend the van-list realtime channel to claim/release
-   UX + an expiry banner.
+3. **Inspection flow** — ✅ built. Claim (`claim_van` RPC: session + atomic lock)
+   → confirm known damage (`damage_confirmations`) → zone walkaround → log new
+   damage + photos → fluids (thresholds) → review → submit (`submit_inspection`
+   RPC: writes damage/confirmations, sets result + `completed_at`, releases lock,
+   all in one transaction).
+4. **Real-time locking** — partly built (claim takes a lock, van list shows live
+   lock state). Remaining: explicit release UX + an expiry countdown banner.
 5. **Damage log** — new vs known views, photo gallery, per-van history.
 6. **Manager dashboard** — live session progress, lead activity, grounded sign-off
    queue (writes `notifications`).

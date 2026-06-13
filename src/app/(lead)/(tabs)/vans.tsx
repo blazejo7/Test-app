@@ -1,5 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -11,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
+import { claimVan } from '@/lib/inspection';
 import { isVanClaimable } from '@/lib/rules';
 import { useVans, type VanWithLock } from '@/lib/vans';
 import type { VanStatus } from '@/types/database';
@@ -32,7 +37,15 @@ function StatusPill({ status }: { status: VanStatus }) {
   );
 }
 
-function VanRow({ van }: { van: VanWithLock }) {
+function VanRow({
+  van,
+  onClaim,
+  claiming,
+}: {
+  van: VanWithLock;
+  onClaim: (vanId: string) => void;
+  claiming: boolean;
+}) {
   const claimable = isVanClaimable(van.lock);
   const locked = !claimable && van.lock;
 
@@ -52,12 +65,17 @@ function VanRow({ van }: { van: VanWithLock }) {
       <View style={styles.rowRight}>
         <StatusPill status={van.status} />
         <TouchableOpacity
-          style={[styles.claimBtn, !claimable && styles.claimBtnDisabled]}
-          disabled={!claimable}
+          style={[styles.claimBtn, (!claimable || claiming) && styles.claimBtnDisabled]}
+          disabled={!claimable || claiming}
+          onPress={() => onClaim(van.id)}
         >
-          <ThemedText type="small" style={styles.claimText}>
-            {claimable ? 'Claim' : 'Locked'}
-          </ThemedText>
+          {claiming ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <ThemedText type="small" style={styles.claimText}>
+              {claimable ? 'Claim' : 'Locked'}
+            </ThemedText>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -67,6 +85,21 @@ function VanRow({ van }: { van: VanWithLock }) {
 export default function Vans() {
   const { profile, signOut } = useAuth();
   const { data, isLoading, isError, error, refetch, isRefetching } = useVans();
+  const queryClient = useQueryClient();
+  const [claimingId, setClaimingId] = useState<string | null>(null);
+
+  async function handleClaim(vanId: string) {
+    setClaimingId(vanId);
+    try {
+      const inspectionId = await claimVan(vanId);
+      await queryClient.invalidateQueries({ queryKey: ['vans'] });
+      router.push({ pathname: '/inspection/[id]', params: { id: inspectionId } });
+    } catch (e) {
+      Alert.alert('Could not claim van', e instanceof Error ? e.message : 'Unknown error');
+    } finally {
+      setClaimingId(null);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -100,7 +133,9 @@ export default function Vans() {
         <FlatList
           data={data}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <VanRow van={item} />}
+          renderItem={({ item }) => (
+            <VanRow van={item} onClaim={handleClaim} claiming={claimingId === item.id} />
+          )}
           contentContainerStyle={styles.list}
           refreshControl={
             <RefreshControl refreshing={isRefetching} onRefresh={refetch} />

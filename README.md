@@ -68,9 +68,11 @@ npx expo start                # run the app
 
 ## What's built vs. on the roadmap
 
-**Built (this scaffold):** auth + role navigation, live van registry (with
-realtime lock state), full DB schema with RLS, domain rules + tests.
+**Built:** auth + role navigation, live van registry (with realtime lock state),
+the **full inspection flow** (claim → known-damage confirm → walkaround → new
+damage + photos → fluids → review → submit, backed by atomic `claim_van` /
+`submit_inspection` RPCs), full DB schema with RLS, domain rules + tests.
 
-**Roadmap:** inspection flow → realtime locking UX → damage log → manager
-dashboard → daily session + summary → rota + push. Build order and design
-rationale are in [`docs/SPEC.md`](docs/SPEC.md).
+**Roadmap:** realtime locking UX → damage log → manager dashboard → daily
+session + summary → rota + push. Build order and design rationale are in
+[`docs/SPEC.md`](docs/SPEC.md).
