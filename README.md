@@ -73,8 +73,9 @@ npx expo start                # run the app
 inspection flow** (claim → known-damage confirm → walkaround → new damage +
 photos → fluids → review → submit, backed by atomic `claim_van` /
 `submit_inspection` RPCs), the **damage log** (filterable list + report detail
-with photo gallery and confirmation history), full DB schema with RLS, domain
-rules + tests.
+with photo gallery and confirmation history), the **manager dashboard**
+(live session progress, recent activity, grounded-van sign-off queue with
+notifications), full DB schema with RLS, domain rules + tests.
 
-**Roadmap:** manager dashboard → daily session + summary → rota + push. Build
-order and design rationale are in [`docs/SPEC.md`](docs/SPEC.md).
+**Roadmap:** daily session + summary report → rota + push. Build order and
+design rationale are in [`docs/SPEC.md`](docs/SPEC.md).

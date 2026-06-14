@@ -88,8 +88,11 @@ Every table carries `fleet_id`, `created_at`, `updated_at`. RLS is enabled on al
    explicit Release (RLS-guarded to owner/manager) and Resume.
 5. **Damage log** — ✅ built. Filterable list (all/new/known/resolved), per-report
    detail with photo gallery (signed URLs) and confirmation history.
-6. **Manager dashboard** — live session progress, lead activity, grounded sign-off
-   queue (writes `notifications`).
+6. **Manager dashboard** — ✅ built. Live session progress, recent lead activity,
+   and a grounded-van sign-off queue. Grounding an inspection queues a
+   `grounded_signoff` notification (trigger) per manager; release (`release_grounded_van`
+   RPC, manager-only) resolves the groundable damage, un-grounds the van, and
+   clears the notifications.
 7. **Daily session + summary report** — auto-generated end-of-session summary
    (clear/damage/grounded/fluids), delivered in-app for v1.
 8. **Rota** — availability (next 2 days) → assign → publish → confirm receipt;
