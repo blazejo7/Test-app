@@ -111,6 +111,18 @@ export interface Inspection {
   updated_at: string;
 }
 
+/** Aggregated end-of-day report, computed and stored by complete_session(). */
+export interface SessionSummary {
+  total_vans: number;
+  vans_done: number;
+  vans_pending: number;
+  clear: number;
+  new_damage: number;
+  grounded: number;
+  grounded_regs: string[];
+  fluids_low: number;
+}
+
 export interface Session {
   id: string;
   fleet_id: string;
@@ -121,6 +133,7 @@ export interface Session {
   status: SessionStatus;
   total_vans: number;
   vans_done: number;
+  summary: SessionSummary | null;
   created_at: string;
   updated_at: string;
 }

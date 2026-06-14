@@ -10,6 +10,8 @@
 import type {
   DamageSeverity,
   FluidLevels,
+  InspectionResult,
+  SessionSummary,
   VanLock,
   VanStatus,
 } from '@/types/database';
@@ -94,4 +96,41 @@ export function lockExpiryFrom(lockedAt: Date): Date {
 export function minutesRemaining(expiresAt: string, now: Date = new Date()): number {
   const ms = new Date(expiresAt).getTime() - now.getTime();
   return Math.max(0, Math.ceil(ms / 60_000));
+}
+
+/** One completed inspection's fields relevant to the summary. */
+export interface SummaryInspection {
+  completed_at: string | null;
+  result: InspectionResult | null;
+  fluid_levels: FluidLevels | null;
+  van?: { reg: string } | null;
+}
+
+/**
+ * Build the daily summary from a session's inspections. Only completed
+ * inspections count. Reused for the live dashboard preview; the authoritative
+ * snapshot is computed and stored by complete_session() at completion.
+ */
+export function buildSessionSummary(
+  inspections: SummaryInspection[],
+  totalVans: number,
+): SessionSummary {
+  const done = inspections.filter((i) => i.completed_at !== null);
+  const countResult = (r: InspectionResult) => done.filter((i) => i.result === r).length;
+
+  return {
+    total_vans: totalVans,
+    vans_done: done.length,
+    vans_pending: Math.max(0, totalVans - done.length),
+    clear: countResult('clear'),
+    new_damage: countResult('new_damage'),
+    grounded: countResult('grounded'),
+    grounded_regs: done
+      .filter((i) => i.result === 'grounded')
+      .map((i) => i.van?.reg)
+      .filter((reg): reg is string => !!reg),
+    fluids_low: done.filter(
+      (i) => i.fluid_levels !== null && !evaluateFluidLevels(i.fluid_levels).ok,
+    ).length,
+  };
 }

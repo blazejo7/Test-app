@@ -2,11 +2,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 import { supabase } from '@/lib/supabase';
+import type { SummaryInspection } from '@/lib/rules';
 import type {
   DamageReport,
   Inspection,
   InspectionResult,
   Session,
+  SessionSummary,
   Van,
 } from '@/types/database';
 
@@ -100,6 +102,35 @@ export function useUnreadSignoffCount() {
   });
 }
 
+export interface SessionInspection extends SummaryInspection {
+  id: string;
+}
+
+/** All inspections in a session (for the live summary preview). */
+export function useSessionInspections(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: ['session-inspections', sessionId],
+    enabled: !!sessionId,
+    queryFn: async (): Promise<SessionInspection[]> => {
+      const { data, error } = await supabase
+        .from('inspections')
+        .select('id, completed_at, result, fluid_levels, van:vans(reg)')
+        .eq('session_id', sessionId!);
+      if (error) throw new Error(error.message);
+      // PostgREST returns `van` as a single object for this to-one embed; the
+      // untyped client mis-infers it as an array, so cast through unknown.
+      return (data ?? []) as unknown as SessionInspection[];
+    },
+  });
+}
+
+/** Finalise the day's session; returns the stored summary snapshot. */
+export async function completeSession(sessionId: string): Promise<SessionSummary> {
+  const { data, error } = await supabase.rpc('complete_session', { p_session_id: sessionId });
+  if (error) throw new Error(error.message);
+  return data as SessionSummary;
+}
+
 /** Manager signs off a grounded van. Returns the van's new status. */
 export async function releaseGroundedVan(vanId: string): Promise<string> {
   const { data, error } = await supabase.rpc('release_grounded_van', { p_van_id: vanId });
@@ -116,6 +147,7 @@ export function useManagerRealtime() {
   useEffect(() => {
     const invalidate = () => {
       queryClient.invalidateQueries({ queryKey: ['session'] });
+      queryClient.invalidateQueries({ queryKey: ['session-inspections'] });
       queryClient.invalidateQueries({ queryKey: ['activity'] });
       queryClient.invalidateQueries({ queryKey: ['signoff'] });
     };

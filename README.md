@@ -75,7 +75,10 @@ photos → fluids → review → submit, backed by atomic `claim_van` /
 `submit_inspection` RPCs), the **damage log** (filterable list + report detail
 with photo gallery and confirmation history), the **manager dashboard**
 (live session progress, recent activity, grounded-van sign-off queue with
-notifications), full DB schema with RLS, domain rules + tests.
+notifications), the **daily session summary** (one-tap completion → aggregated
+report snapshot + manager notification), full DB schema with RLS, domain rules
++ tests.
 
-**Roadmap:** daily session + summary report → rota + push. Build order and
-design rationale are in [`docs/SPEC.md`](docs/SPEC.md).
+**Roadmap:** rota (availability → assign → publish → confirm) + push
+notifications. Build order and design rationale are in
+[`docs/SPEC.md`](docs/SPEC.md).

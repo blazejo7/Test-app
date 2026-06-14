@@ -1,16 +1,22 @@
-import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { SessionSummaryCard } from '@/components/manager/session-summary-card';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
 import {
+  completeSession,
   useManagerRealtime,
   useRecentActivity,
+  useSessionInspections,
   useSignoffQueue,
   useTodaySession,
   type ActivityRow,
 } from '@/lib/manager';
+import { buildSessionSummary } from '@/lib/rules';
 import type { InspectionResult } from '@/types/database';
 
 const RESULT_COLOR: Record<InspectionResult, string> = {
@@ -19,9 +25,12 @@ const RESULT_COLOR: Record<InspectionResult, string> = {
   grounded: '#D92D20',
 };
 
-function ProgressCard() {
+function SessionPanel() {
   const { data: session, isLoading } = useTodaySession();
+  const { data: inspections } = useSessionInspections(session?.id);
   const { data: queue } = useSignoffQueue();
+  const queryClient = useQueryClient();
+  const [completing, setCompleting] = useState(false);
 
   if (isLoading) {
     return (
@@ -44,30 +53,85 @@ function ProgressCard() {
 
   const pct = session.total_vans ? Math.round((session.vans_done / session.total_vans) * 100) : 0;
   const grounded = queue?.length ?? 0;
+  const complete = session.status === 'complete';
+  const summary = complete && session.summary
+    ? session.summary
+    : buildSessionSummary(inspections ?? [], session.total_vans);
+
+  function onComplete() {
+    Alert.alert(
+      "Complete today's check?",
+      'This finalises the daily report and notifies managers. A session cannot be reopened.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Complete',
+          onPress: async () => {
+            setCompleting(true);
+            try {
+              await completeSession(session!.id);
+              await queryClient.invalidateQueries({ queryKey: ['session'] });
+            } catch (e) {
+              Alert.alert('Could not complete', e instanceof Error ? e.message : 'Unknown error');
+            } finally {
+              setCompleting(false);
+            }
+          },
+        },
+      ],
+    );
+  }
 
   return (
-    <View style={styles.card}>
-      <View style={styles.cardHead}>
-        <ThemedText type="smallBold">Today&apos;s fleet check</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {session.status === 'complete' ? 'Complete' : 'In progress'}
+    <View style={styles.panel}>
+      <View style={styles.card}>
+        <View style={styles.cardHead}>
+          <ThemedText type="smallBold">Today&apos;s fleet check</ThemedText>
+          <ThemedText type="small" themeColor={complete ? undefined : 'textSecondary'}>
+            {complete ? '✅ Complete' : 'In progress'}
+          </ThemedText>
+        </View>
+        <ThemedText type="title">
+          {session.vans_done}
+          <ThemedText type="default" themeColor="textSecondary">
+            {' '}
+            / {session.total_vans} vans
+          </ThemedText>
         </ThemedText>
+        <View style={styles.track}>
+          <View style={[styles.fill, { width: `${pct}%` }]} />
+        </View>
+        {grounded > 0 ? (
+          <ThemedText type="small" style={styles.grounded}>
+            {grounded} van{grounded > 1 ? 's' : ''} grounded — awaiting sign-off
+          </ThemedText>
+        ) : null}
       </View>
-      <ThemedText type="title">
-        {session.vans_done}
-        <ThemedText type="default" themeColor="textSecondary">
-          {' '}
-          / {session.total_vans} vans
-        </ThemedText>
+
+      <ThemedText type="smallBold">
+        {complete ? 'Daily summary' : 'Summary so far'}
       </ThemedText>
-      <View style={styles.track}>
-        <View style={[styles.fill, { width: `${pct}%` }]} />
-      </View>
-      {grounded > 0 ? (
-        <ThemedText type="small" style={styles.grounded}>
-          {grounded} van{grounded > 1 ? 's' : ''} grounded — awaiting sign-off
+      <SessionSummaryCard summary={summary} />
+
+      {complete ? (
+        <ThemedText type="small" themeColor="textSecondary" style={styles.completedAt}>
+          Completed {session.completed_at ? new Date(session.completed_at).toLocaleString() : ''}
         </ThemedText>
-      ) : null}
+      ) : (
+        <TouchableOpacity
+          style={[styles.completeBtn, completing && styles.completeBtnDisabled]}
+          onPress={onComplete}
+          disabled={completing}
+        >
+          {completing ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <ThemedText type="smallBold" style={styles.completeText}>
+              Complete today&apos;s check
+            </ThemedText>
+          )}
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -120,7 +184,7 @@ export default function Dashboard() {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View style={styles.headerBlock}>
-            <ProgressCard />
+            <SessionPanel />
             <ThemedText type="smallBold" style={styles.sectionTitle}>
               Recent activity
             </ThemedText>
@@ -151,6 +215,7 @@ const styles = StyleSheet.create({
   },
   list: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.two },
   headerBlock: { gap: Spacing.three, marginBottom: Spacing.two },
+  panel: { gap: Spacing.two },
   card: {
     gap: Spacing.two,
     backgroundColor: Colors.light.backgroundElement,
@@ -166,6 +231,15 @@ const styles = StyleSheet.create({
   },
   fill: { height: 8, borderRadius: 4, backgroundColor: '#208AEF' },
   grounded: { color: '#D92D20' },
+  completeBtn: {
+    backgroundColor: '#208AEF',
+    borderRadius: 10,
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+  },
+  completeBtnDisabled: { opacity: 0.6 },
+  completeText: { color: '#fff' },
+  completedAt: { textAlign: 'center' },
   sectionTitle: { marginTop: Spacing.two },
   loader: { alignSelf: 'flex-start' },
   activityRow: {

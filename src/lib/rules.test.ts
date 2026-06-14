@@ -1,4 +1,5 @@
 import {
+  buildSessionSummary,
   deriveVanStatus,
   evaluateFluidLevels,
   FLUID_LOW_THRESHOLD,
@@ -7,6 +8,7 @@ import {
   lockExpiryFrom,
   LOCK_DURATION_MINUTES,
   minutesRemaining,
+  type SummaryInspection,
 } from './rules';
 
 describe('evaluateFluidLevels', () => {
@@ -79,5 +81,40 @@ describe('minutesRemaining', () => {
 
   it('clamps to 0 once expired', () => {
     expect(minutesRemaining('2026-06-13T11:50:00Z', now)).toBe(0);
+  });
+});
+
+describe('buildSessionSummary', () => {
+  const ok = { adblue: 80, coolant: 80, screenwash: 80 };
+  const low = { adblue: 5, coolant: 80, screenwash: 80 };
+
+  const inspections: SummaryInspection[] = [
+    { completed_at: 't', result: 'clear', fluid_levels: ok, van: { reg: 'A1' } },
+    { completed_at: 't', result: 'new_damage', fluid_levels: low, van: { reg: 'A2' } },
+    { completed_at: 't', result: 'grounded', fluid_levels: ok, van: { reg: 'A3' } },
+    { completed_at: null, result: null, fluid_levels: null, van: { reg: 'A4' } }, // draft, ignored
+  ];
+
+  it('aggregates completed inspections only', () => {
+    const s = buildSessionSummary(inspections, 5);
+    expect(s).toEqual({
+      total_vans: 5,
+      vans_done: 3,
+      vans_pending: 2,
+      clear: 1,
+      new_damage: 1,
+      grounded: 1,
+      grounded_regs: ['A3'],
+      fluids_low: 1,
+    });
+  });
+
+  it('handles an empty session', () => {
+    expect(buildSessionSummary([], 4)).toMatchObject({
+      vans_done: 0,
+      vans_pending: 4,
+      grounded_regs: [],
+      fluids_low: 0,
+    });
   });
 });

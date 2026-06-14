@@ -1,0 +1,59 @@
+import { StyleSheet, View } from 'react-native';
+
+import { ThemedText } from '@/components/themed-text';
+import { Colors, Spacing } from '@/constants/theme';
+import type { SessionSummary } from '@/types/database';
+
+function Stat({ label, value, color }: { label: string; value: number; color?: string }) {
+  return (
+    <View style={styles.stat}>
+      <ThemedText type="subtitle" style={color ? { color } : undefined}>
+        {value}
+      </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {label}
+      </ThemedText>
+    </View>
+  );
+}
+
+/** Renders an end-of-day summary — used both as a live preview and the stored snapshot. */
+export function SessionSummaryCard({ summary }: { summary: SessionSummary }) {
+  return (
+    <View style={styles.card}>
+      <View style={styles.statRow}>
+        <Stat label="Clear" value={summary.clear} color="#12B76A" />
+        <Stat label="New damage" value={summary.new_damage} color="#F79009" />
+        <Stat label="Grounded" value={summary.grounded} color="#D92D20" />
+      </View>
+
+      <View style={styles.metaRow}>
+        <ThemedText type="small" themeColor="textSecondary">
+          {summary.vans_done}/{summary.total_vans} done · {summary.vans_pending} pending
+        </ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          {summary.fluids_low} with low fluids
+        </ThemedText>
+      </View>
+
+      {summary.grounded_regs.length > 0 ? (
+        <ThemedText type="small" style={styles.grounded}>
+          Grounded: {summary.grounded_regs.join(', ')}
+        </ThemedText>
+      ) : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    gap: Spacing.three,
+    backgroundColor: Colors.light.backgroundElement,
+    borderRadius: 12,
+    padding: Spacing.four,
+  },
+  statRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  stat: { alignItems: 'center', gap: 2 },
+  metaRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  grounded: { color: '#D92D20' },
+});

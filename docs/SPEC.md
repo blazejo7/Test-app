@@ -93,8 +93,12 @@ Every table carries `fleet_id`, `created_at`, `updated_at`. RLS is enabled on al
    `grounded_signoff` notification (trigger) per manager; release (`release_grounded_van`
    RPC, manager-only) resolves the groundable damage, un-grounds the van, and
    clears the notifications.
-7. **Daily session + summary report** — auto-generated end-of-session summary
-   (clear/damage/grounded/fluids), delivered in-app for v1.
+7. **Daily session + summary report** — ✅ built. `complete_session` RPC aggregates
+   the day's inspections into a summary (clear/new_damage/grounded counts, grounded
+   regs, low-fluid count), stores an immutable snapshot on the session, and pushes a
+   `session_complete` notification to managers. A session can't be reopened. The
+   dashboard shows a live preview (`buildSessionSummary`, unit-tested) and the final
+   snapshot once complete.
 8. **Rota** — availability (next 2 days) → assign → publish → confirm receipt;
    introduce Expo push notifications here.
 
