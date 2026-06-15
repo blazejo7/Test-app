@@ -48,6 +48,10 @@ npx supabase start            # local Postgres + Auth + Storage (needs Docker)
 npx expo start                # run the app
 ```
 
+**Testing on a physical phone?** See
+[`docs/RUNNING-ON-PHONE.md`](docs/RUNNING-ON-PHONE.md) — a hosted-Supabase + Expo Go
+walkthrough (your phone can't reach a `127.0.0.1` Supabase).
+
 ### Demo logins (from `supabase/seed.sql`, password `password123`)
 
 | Email | Role | Lands on |
