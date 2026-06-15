@@ -76,9 +76,14 @@ photos → fluids → review → submit, backed by atomic `claim_van` /
 with photo gallery and confirmation history), the **manager dashboard**
 (live session progress, recent activity, grounded-van sign-off queue with
 notifications), the **daily session summary** (one-tap completion → aggregated
-report snapshot + manager notification), full DB schema with RLS, domain rules
-+ tests.
+report snapshot + manager notification), and the **rota** (leads mark
+availability → manager assigns + publishes with Expo push → leads confirm
+receipt), full DB schema with RLS, domain rules + tests.
 
-**Roadmap:** rota (availability → assign → publish → confirm) + push
-notifications. Build order and design rationale are in
-[`docs/SPEC.md`](docs/SPEC.md).
+All 8 features from the spec are built. Design rationale and the corrected data
+model are in [`docs/SPEC.md`](docs/SPEC.md).
+
+> Two pieces need a physical device and can't be exercised headlessly: damage
+> photo capture/upload and Expo push delivery. Both are wired up; their
+> server-side halves (storage bucket + RLS, push-token storage + send) are
+> verified. In-app notifications are the authoritative channel for v1.

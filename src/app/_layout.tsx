@@ -5,8 +5,17 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { registerForPush } from '@/lib/push';
 
 const queryClient = new QueryClient();
+
+/** Register this device for rota push once a profile is available (best-effort). */
+function usePushRegistration() {
+  const { profile } = useAuth();
+  useEffect(() => {
+    if (profile) registerForPush(profile.id, profile.fleet_id);
+  }, [profile]);
+}
 
 /**
  * Redirects based on auth + role:
@@ -46,6 +55,7 @@ function useAuthGate() {
 
 function RootNavigator() {
   const loading = useAuthGate();
+  usePushRegistration();
 
   if (loading) {
     return (

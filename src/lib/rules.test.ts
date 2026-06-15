@@ -8,6 +8,7 @@ import {
   lockExpiryFrom,
   LOCK_DURATION_MINUTES,
   minutesRemaining,
+  rotaWindow,
   type SummaryInspection,
 } from './rules';
 
@@ -116,5 +117,15 @@ describe('buildSessionSummary', () => {
       grounded_regs: [],
       fluids_low: 0,
     });
+  });
+});
+
+describe('rotaWindow', () => {
+  it('returns the next 2 dates after a given day', () => {
+    expect(rotaWindow(new Date('2026-06-15T10:00:00Z'))).toEqual(['2026-06-16', '2026-06-17']);
+  });
+
+  it('rolls over month boundaries', () => {
+    expect(rotaWindow(new Date('2026-06-30T10:00:00Z'))).toEqual(['2026-07-01', '2026-07-02']);
   });
 });

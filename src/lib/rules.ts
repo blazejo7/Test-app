@@ -134,3 +134,17 @@ export function buildSessionSummary(
     ).length,
   };
 }
+
+/**
+ * The rota planning window: the next `days` dates (YYYY-MM-DD) after `from`.
+ * Leads mark availability here; the matching SQL guard is in set_availability().
+ */
+export function rotaWindow(from: Date = new Date(), days = 2): string[] {
+  const out: string[] = [];
+  for (let i = 1; i <= days; i++) {
+    const d = new Date(from);
+    d.setUTCDate(d.getUTCDate() + i);
+    out.push(d.toISOString().slice(0, 10));
+  }
+  return out;
+}

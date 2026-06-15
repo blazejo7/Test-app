@@ -13,6 +13,7 @@ export default function LeadLayout() {
       <Tabs.Screen name="vans" options={{ title: 'Vans' }} />
       <Tabs.Screen name="inspect" options={{ title: 'Inspect' }} />
       <Tabs.Screen name="damage" options={{ title: 'Damage' }} />
+      <Tabs.Screen name="rota" options={{ title: 'Rota' }} />
     </Tabs>
   );
 }

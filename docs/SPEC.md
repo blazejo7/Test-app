@@ -99,8 +99,16 @@ Every table carries `fleet_id`, `created_at`, `updated_at`. RLS is enabled on al
    `session_complete` notification to managers. A session can't be reopened. The
    dashboard shows a live preview (`buildSessionSummary`, unit-tested) and the final
    snapshot once complete.
-8. **Rota** — availability (next 2 days) → assign → publish → confirm receipt;
-   introduce Expo push notifications here.
+8. **Rota** — ✅ built. Leads mark availability for the next 2 days
+   (`set_availability`); manager assigns (`set_assignment`) and publishes
+   (`publish_rota`), which queues a `rota_published` notification and sends an
+   Expo push to assigned leads; leads confirm receipt (`confirm_rota`). All
+   transitions are authorization-checked RPCs. Push tokens live in `push_tokens`
+   (managers can read their fleet's to send).
+
+   _Push delivery caveat:_ Expo push tokens only issue on a physical device in an
+   EAS build, so actual delivery needs a real device — the in-app `rota_published`
+   notification is the authoritative v1 channel; push is best-effort on top.
 
 ---
 
