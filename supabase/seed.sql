@@ -25,7 +25,7 @@ values
   (
     '00000000-0000-0000-0000-000000000000',
     '00000000-0000-0000-0000-00000000a001', 'authenticated', 'authenticated',
-    'manager@fleetflow.test', crypt('password123', gen_salt('bf')),
+    'manager@fleetflow.test', extensions.crypt('password123', extensions.gen_salt('bf')),
     now(), '{"provider":"email","providers":["email"]}',
     '{"name":"Morgan Manager","role":"manager","fleet_id":"00000000-0000-0000-0000-0000000000f1","avatar_initials":"MM"}',
     now(), now(), '', '', '', ''
@@ -33,7 +33,7 @@ values
   (
     '00000000-0000-0000-0000-000000000000',
     '00000000-0000-0000-0000-00000000a002', 'authenticated', 'authenticated',
-    'lead.sam@fleetflow.test', crypt('password123', gen_salt('bf')),
+    'lead.sam@fleetflow.test', extensions.crypt('password123', extensions.gen_salt('bf')),
     now(), '{"provider":"email","providers":["email"]}',
     '{"name":"Sam Lead","role":"lead","fleet_id":"00000000-0000-0000-0000-0000000000f1","avatar_initials":"SL"}',
     now(), now(), '', '', '', ''
@@ -41,7 +41,7 @@ values
   (
     '00000000-0000-0000-0000-000000000000',
     '00000000-0000-0000-0000-00000000a003', 'authenticated', 'authenticated',
-    'lead.jo@fleetflow.test', crypt('password123', gen_salt('bf')),
+    'lead.jo@fleetflow.test', extensions.crypt('password123', extensions.gen_salt('bf')),
     now(), '{"provider":"email","providers":["email"]}',
     '{"name":"Jo Lead","role":"lead","fleet_id":"00000000-0000-0000-0000-0000000000f1","avatar_initials":"JL"}',
     now(), now(), '', '', '', ''
