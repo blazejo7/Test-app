@@ -9,7 +9,6 @@ export function useColorScheme() {
 
   useEffect(() => {
     // Intentional: flip to the real scheme once hydrated to avoid an SSR mismatch.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasHydrated(true);
   }, []);
 
