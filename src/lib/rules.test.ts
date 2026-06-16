@@ -1,0 +1,131 @@
+import {
+  buildSessionSummary,
+  deriveVanStatus,
+  evaluateFluidLevels,
+  FLUID_LOW_THRESHOLD,
+  isLockExpired,
+  isVanClaimable,
+  lockExpiryFrom,
+  LOCK_DURATION_MINUTES,
+  minutesRemaining,
+  rotaWindow,
+  type SummaryInspection,
+} from './rules';
+
+describe('evaluateFluidLevels', () => {
+  it('reports all fluids ok when above threshold', () => {
+    const result = evaluateFluidLevels({ adblue: 80, coolant: 50, screenwash: 100 });
+    expect(result.ok).toBe(true);
+    expect(result.low).toEqual([]);
+  });
+
+  it('flags fluids at or below threshold', () => {
+    const result = evaluateFluidLevels({
+      adblue: FLUID_LOW_THRESHOLD,
+      coolant: 5,
+      screenwash: 60,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.low.sort()).toEqual(['adblue', 'coolant']);
+  });
+});
+
+describe('deriveVanStatus', () => {
+  it('is clear with no open damage', () => {
+    expect(deriveVanStatus([])).toBe('clear');
+  });
+
+  it('is new_damage with non-groundable damage', () => {
+    expect(deriveVanStatus(['cosmetic', 'monitor'])).toBe('new_damage');
+  });
+
+  it('is grounded when any damage is groundable', () => {
+    expect(deriveVanStatus(['cosmetic', 'groundable'])).toBe('grounded');
+  });
+});
+
+describe('isLockExpired / isVanClaimable', () => {
+  const now = new Date('2026-06-13T12:00:00Z');
+
+  it('treats a future expiry as active', () => {
+    const lock = { expires_at: '2026-06-13T12:10:00Z' };
+    expect(isLockExpired(lock, now)).toBe(false);
+    expect(isVanClaimable(lock, now)).toBe(false);
+  });
+
+  it('treats a past expiry as expired and claimable', () => {
+    const lock = { expires_at: '2026-06-13T11:50:00Z' };
+    expect(isLockExpired(lock, now)).toBe(true);
+    expect(isVanClaimable(lock, now)).toBe(true);
+  });
+
+  it('treats a missing lock as claimable', () => {
+    expect(isVanClaimable(null, now)).toBe(true);
+    expect(isVanClaimable(undefined, now)).toBe(true);
+  });
+});
+
+describe('lockExpiryFrom', () => {
+  it('adds the lock duration', () => {
+    const lockedAt = new Date('2026-06-13T12:00:00Z');
+    const expiry = lockExpiryFrom(lockedAt);
+    expect(expiry.getTime() - lockedAt.getTime()).toBe(LOCK_DURATION_MINUTES * 60_000);
+  });
+});
+
+describe('minutesRemaining', () => {
+  const now = new Date('2026-06-13T12:00:00Z');
+
+  it('rounds up minutes left', () => {
+    expect(minutesRemaining('2026-06-13T12:09:30Z', now)).toBe(10);
+  });
+
+  it('clamps to 0 once expired', () => {
+    expect(minutesRemaining('2026-06-13T11:50:00Z', now)).toBe(0);
+  });
+});
+
+describe('buildSessionSummary', () => {
+  const ok = { adblue: 80, coolant: 80, screenwash: 80 };
+  const low = { adblue: 5, coolant: 80, screenwash: 80 };
+
+  const inspections: SummaryInspection[] = [
+    { completed_at: 't', result: 'clear', fluid_levels: ok, van: { reg: 'A1' } },
+    { completed_at: 't', result: 'new_damage', fluid_levels: low, van: { reg: 'A2' } },
+    { completed_at: 't', result: 'grounded', fluid_levels: ok, van: { reg: 'A3' } },
+    { completed_at: null, result: null, fluid_levels: null, van: { reg: 'A4' } }, // draft, ignored
+  ];
+
+  it('aggregates completed inspections only', () => {
+    const s = buildSessionSummary(inspections, 5);
+    expect(s).toEqual({
+      total_vans: 5,
+      vans_done: 3,
+      vans_pending: 2,
+      clear: 1,
+      new_damage: 1,
+      grounded: 1,
+      grounded_regs: ['A3'],
+      fluids_low: 1,
+    });
+  });
+
+  it('handles an empty session', () => {
+    expect(buildSessionSummary([], 4)).toMatchObject({
+      vans_done: 0,
+      vans_pending: 4,
+      grounded_regs: [],
+      fluids_low: 0,
+    });
+  });
+});
+
+describe('rotaWindow', () => {
+  it('returns the next 2 dates after a given day', () => {
+    expect(rotaWindow(new Date('2026-06-15T10:00:00Z'))).toEqual(['2026-06-16', '2026-06-17']);
+  });
+
+  it('rolls over month boundaries', () => {
+    expect(rotaWindow(new Date('2026-06-30T10:00:00Z'))).toEqual(['2026-07-01', '2026-07-02']);
+  });
+});
