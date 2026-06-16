@@ -20,23 +20,23 @@ import { notify } from '@/lib/dialogs';
 import { claimVan } from '@/lib/inspection';
 import { isLockExpired, minutesRemaining } from '@/lib/rules';
 import { releaseVan, useNow, useVans, type VanWithLock } from '@/lib/vans';
+import { vanStatusColor } from '@/lib/status-colors';
 import type { VanStatus } from '@/types/database';
 
-const STATUS_META: Record<VanStatus, { label: string; color: string }> = {
-  clear: { label: 'Clear', color: '#12B76A' },
-  new_damage: { label: 'New damage', color: '#F79009' },
-  grounded: { label: 'Grounded', color: '#D92D20' },
+const STATUS_LABEL: Record<VanStatus, string> = {
+  clear: 'Clear',
+  new_damage: 'New damage',
+  grounded: 'Grounded',
 };
 
 function StatusPill({ status }: { status: VanStatus }) {
   const c = useThemeColors();
   const styles = useMemo(() => makeStyles(c), [c]);
 
-  const meta = STATUS_META[status];
   return (
-    <View style={[styles.pill, { backgroundColor: meta.color }]}>
+    <View style={[styles.pill, { backgroundColor: vanStatusColor(c, status) }]}>
       <ThemedText type="small" style={styles.pillText}>
-        {meta.label}
+        {STATUS_LABEL[status]}
       </ThemedText>
     </View>
   );
@@ -156,7 +156,7 @@ export default function Vans() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.header}>
         <View>
-          <ThemedText type="default">Van registry</ThemedText>
+          <ThemedText type="heading">Van registry</ThemedText>
           {profile ? (
             <ThemedText type="small" themeColor="textSecondary">
               {profile.name}
@@ -231,12 +231,12 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
   rowMain: { gap: 2, flexShrink: 1 },
   rowRight: { alignItems: 'flex-end', gap: Spacing.two },
   actions: { flexDirection: 'row', gap: Spacing.two },
-  heldText: { color: '#12B76A' },
-  lockedText: { color: '#F79009' },
+  heldText: { color: c.success },
+  lockedText: { color: c.warning },
   pill: { borderRadius: 999, paddingHorizontal: Spacing.two, paddingVertical: 2 },
   pillText: { color: '#fff', fontSize: 12 },
   claimBtn: {
-    backgroundColor: '#208AEF',
+    backgroundColor: c.primary,
     borderRadius: 8,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
@@ -250,6 +250,6 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: c.backgroundSelected,
   },
-  releaseText: { color: '#D92D20' },
-  error: { color: '#D92D20' },
+  releaseText: { color: c.danger },
+  error: { color: c.danger },
 });

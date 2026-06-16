@@ -126,7 +126,7 @@ function Field({ label, value }: { label: string; value: string }) {
 const makeStyles = (c: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: c.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.three },
-  error: { color: '#D92D20' },
+  error: { color: c.danger },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

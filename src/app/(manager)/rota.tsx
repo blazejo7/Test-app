@@ -18,13 +18,14 @@ import {
 } from '@/lib/rota';
 import { sendExpoPush } from '@/lib/push';
 import { rotaWindow } from '@/lib/rules';
+import { rotaStatusColor } from '@/lib/status-colors';
 import type { RotaStatus } from '@/types/database';
 
-const STATUS_META: Record<RotaStatus | 'unset', { label: string; color: string }> = {
-  available: { label: 'Available', color: '#12B76A' },
-  assigned: { label: 'Assigned', color: '#208AEF' },
-  absent: { label: 'Absent', color: '#98A2B3' },
-  unset: { label: 'No response', color: '#98A2B3' },
+const STATUS_LABEL: Record<RotaStatus | 'unset', string> = {
+  available: 'Available',
+  assigned: 'Assigned',
+  absent: 'Absent',
+  unset: 'No response',
 };
 
 function formatDay(date: string): string {
@@ -83,7 +84,6 @@ function DaySection({
 
       {rows.map(({ lead, row }) => {
         const status = (row?.status ?? 'unset') as RotaStatus | 'unset';
-        const meta = STATUS_META[status];
         const assigned = status === 'assigned';
         const key = `${lead.id}:${date}`;
         return (
@@ -91,9 +91,9 @@ function DaySection({
             <View style={styles.flex}>
               <ThemedText type="small">{lead.name}</ThemedText>
               <View style={styles.statusRow}>
-                <View style={[styles.dot, { backgroundColor: meta.color }]} />
+                <View style={[styles.dot, { backgroundColor: rotaStatusColor(c, status) }]} />
                 <ThemedText type="small" themeColor="textSecondary">
-                  {meta.label}
+                  {STATUS_LABEL[status]}
                   {assigned && row?.confirmed ? ' · confirmed' : ''}
                 </ThemedText>
               </View>
@@ -157,7 +157,7 @@ export default function ManagerRota() {
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.header}>
-        <ThemedText type="default">Rota</ThemedText>
+        <ThemedText type="heading">Rota</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           Assign leads and publish the next 2 days.
         </ThemedText>
@@ -204,7 +204,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     marginBottom: Spacing.one,
   },
   publishBtn: {
-    backgroundColor: '#208AEF',
+    backgroundColor: c.primary,
     borderRadius: 8,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
@@ -227,7 +227,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: c.backgroundSelected,
   },
-  assignBtnActive: { backgroundColor: '#208AEF', borderColor: '#208AEF' },
+  assignBtnActive: { backgroundColor: c.primary, borderColor: c.primary },
   assignTextActive: { color: '#fff' },
   disabled: { opacity: 0.5 },
 });

@@ -121,7 +121,7 @@ export default function LeadRota() {
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.header}>
-        <ThemedText type="default">My rota</ThemedText>
+        <ThemedText type="heading">My rota</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           Set your availability for the next 2 days.
         </ThemedText>
@@ -161,9 +161,9 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     padding: Spacing.three,
   },
   assigned: { gap: Spacing.two },
-  assignedText: { color: '#12B76A' },
+  assignedText: { color: c.success },
   confirmBtn: {
-    backgroundColor: '#208AEF',
+    backgroundColor: c.primary,
     borderRadius: 8,
     paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.three,

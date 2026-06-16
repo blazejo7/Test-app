@@ -103,7 +103,7 @@ export default function SignOff() {
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.header}>
-        <ThemedText type="default">Sign-off queue</ThemedText>
+        <ThemedText type="heading">Sign-off queue</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           Grounded vans awaiting release.
         </ThemedText>
@@ -153,10 +153,10 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     padding: Spacing.three,
   },
   cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  groundedTag: { color: '#D92D20' },
+  groundedTag: { color: c.danger },
   damageRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   approveBtn: {
-    backgroundColor: '#12B76A',
+    backgroundColor: c.success,
     borderRadius: 8,
     paddingVertical: Spacing.three,
     alignItems: 'center',
@@ -164,5 +164,5 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
   },
   approveBtnDisabled: { opacity: 0.6 },
   approveText: { color: '#fff' },
-  error: { color: '#D92D20' },
+  error: { color: c.danger },
 });

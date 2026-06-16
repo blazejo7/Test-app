@@ -193,7 +193,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: c.backgroundSelected,
   },
-  bubbleActive: { backgroundColor: '#208AEF', borderColor: '#208AEF' },
+  bubbleActive: { backgroundColor: c.primary, borderColor: c.primary },
   bubbleTextActive: { color: '#fff' },
   added: { gap: Spacing.two },
   addedRow: {
@@ -204,7 +204,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     borderRadius: 10,
     padding: Spacing.three,
   },
-  remove: { color: '#D92D20' },
+  remove: { color: c.danger },
   form: {
     gap: Spacing.two,
     borderWidth: 1,
@@ -232,7 +232,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
   formActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.three, marginTop: Spacing.one },
   cancelBtn: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.two },
   saveBtn: {
-    backgroundColor: '#208AEF',
+    backgroundColor: c.primary,
     borderRadius: 8,
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,

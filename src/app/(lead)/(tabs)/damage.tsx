@@ -21,7 +21,7 @@ export default function Damage() {
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.header}>
-        <ThemedText type="default">Damage log</ThemedText>
+        <ThemedText type="heading">Damage log</ThemedText>
         <ChipSelect options={DAMAGE_FILTERS} selected={filter} onSelect={setFilter} />
       </View>
 
@@ -104,5 +104,5 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
   rowMain: { gap: 2, flexShrink: 1 },
   meta: { flexDirection: 'row', gap: Spacing.three, marginTop: 2 },
   badges: { alignItems: 'flex-end', gap: Spacing.two },
-  error: { color: '#D92D20' },
+  error: { color: c.danger },
 });

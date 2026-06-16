@@ -18,7 +18,7 @@ export default function Inspect() {
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.header}>
-        <ThemedText type="default">In-progress inspections</ThemedText>
+        <ThemedText type="heading">In-progress inspections</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           Claim a van from the Vans tab to start a new one.
         </ThemedText>
@@ -77,5 +77,5 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     borderRadius: 12,
     padding: Spacing.three,
   },
-  resume: { color: '#208AEF' },
+  resume: { color: c.primary },
 });

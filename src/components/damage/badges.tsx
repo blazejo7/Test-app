@@ -1,25 +1,26 @@
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing, type ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import type { DamageSeverity, DamageStatus } from '@/types/database';
 
-const SEVERITY_COLOR: Record<DamageSeverity, string> = {
-  cosmetic: '#98A2B3',
-  monitor: '#F79009',
-  repair_needed: '#DC6803',
-  groundable: '#D92D20',
-};
+function severityColor(c: ThemeColors, s: DamageSeverity): string {
+  if (s === 'groundable') return c.danger;
+  if (s === 'repair_needed' || s === 'monitor') return c.warning;
+  return c.textSecondary; // cosmetic
+}
 
-const STATUS_COLOR: Record<DamageStatus, string> = {
-  new: '#208AEF',
-  known: '#98A2B3',
-  resolved: '#12B76A',
-};
+function statusColor(c: ThemeColors, s: DamageStatus): string {
+  if (s === 'resolved') return c.success;
+  if (s === 'new') return c.primary;
+  return c.textSecondary; // known
+}
 
 export function SeverityBadge({ severity }: { severity: DamageSeverity }) {
+  const c = useThemeColors();
   return (
-    <View style={[styles.badge, { backgroundColor: SEVERITY_COLOR[severity] }]}>
+    <View style={[styles.badge, { backgroundColor: severityColor(c, severity) }]}>
       <ThemedText type="small" style={styles.text}>
         {severity.replace('_', ' ')}
       </ThemedText>
@@ -28,8 +29,9 @@ export function SeverityBadge({ severity }: { severity: DamageSeverity }) {
 }
 
 export function StatusBadge({ status }: { status: DamageStatus }) {
+  const c = useThemeColors();
   return (
-    <View style={[styles.badge, { backgroundColor: STATUS_COLOR[status] }]}>
+    <View style={[styles.badge, { backgroundColor: statusColor(c, status) }]}>
       <ThemedText type="small" style={styles.text}>
         {status}
       </ThemedText>
@@ -38,6 +40,6 @@ export function StatusBadge({ status }: { status: DamageStatus }) {
 }
 
 const styles = StyleSheet.create({
-  badge: { borderRadius: 999, paddingHorizontal: Spacing.two, paddingVertical: 2 },
-  text: { color: '#fff', fontSize: 12 },
+  badge: { borderRadius: Radius.pill, paddingHorizontal: Spacing.two, paddingVertical: 3 },
+  text: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
 });

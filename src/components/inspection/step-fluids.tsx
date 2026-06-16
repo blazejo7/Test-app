@@ -74,7 +74,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     padding: Spacing.three,
   },
   labelWrap: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  lowText: { color: '#D92D20' },
+  lowText: { color: c.danger },
   input: {
     borderWidth: 1,
     borderColor: c.backgroundSelected,
@@ -85,5 +85,5 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     textAlign: 'center',
     color: c.text,
   },
-  inputLow: { borderColor: '#D92D20' },
+  inputLow: { borderColor: c.danger },
 });

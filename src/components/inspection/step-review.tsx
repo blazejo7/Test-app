@@ -7,12 +7,13 @@ import type { ThemeColors } from '@/constants/theme';
 import { useThemeColors } from '@/lib/theme';
 import { ZONES, type NewDamageInput, type ZoneStatus } from '@/lib/inspection';
 import { deriveVanStatus, evaluateFluidLevels } from '@/lib/rules';
+import { resultColor } from '@/lib/status-colors';
 import type { DamageReport, FluidLevels, InspectionResult } from '@/types/database';
 
-const RESULT_META: Record<InspectionResult, { label: string; color: string }> = {
-  clear: { label: 'Clear', color: '#12B76A' },
-  new_damage: { label: 'New damage', color: '#F79009' },
-  grounded: { label: 'Grounded', color: '#D92D20' },
+const RESULT_LABEL: Record<InspectionResult, string> = {
+  clear: 'Clear',
+  new_damage: 'New damage',
+  grounded: 'Grounded',
 };
 
 /** Predict the inspection result client-side (the server is authoritative). */
@@ -44,15 +45,14 @@ export function StepReview({
   const styles = useMemo(() => makeStyles(c), [c]);
 
   const result = predictResult(knownDamage, newDamage);
-  const meta = RESULT_META[result];
   const lowFluids = evaluateFluidLevels(fluids).low;
   const zonesChecked = ZONES.filter((z) => zones[z.value]).length;
 
   return (
     <View style={styles.list}>
-      <View style={[styles.resultBanner, { backgroundColor: meta.color }]}>
+      <View style={[styles.resultBanner, { backgroundColor: resultColor(c, result) }]}>
         <ThemedText type="smallBold" style={styles.resultText}>
-          Predicted result: {meta.label}
+          Predicted result: {RESULT_LABEL[result]}
         </ThemedText>
       </View>
 
@@ -104,6 +104,6 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     borderRadius: 10,
     padding: Spacing.three,
   },
-  warn: { color: '#D92D20' },
+  warn: { color: c.danger },
   note: { marginTop: Spacing.three, textAlign: 'center' },
 });

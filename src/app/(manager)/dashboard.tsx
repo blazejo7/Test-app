@@ -20,13 +20,8 @@ import {
   type ActivityRow,
 } from '@/lib/manager';
 import { buildSessionSummary } from '@/lib/rules';
-import type { InspectionResult } from '@/types/database';
+import { resultColor } from '@/lib/status-colors';
 
-const RESULT_COLOR: Record<InspectionResult, string> = {
-  clear: '#12B76A',
-  new_damage: '#F79009',
-  grounded: '#D92D20',
-};
 
 function SessionPanel() {
   const c = useThemeColors();
@@ -140,7 +135,7 @@ function ActivityItem({ item }: { item: ActivityRow }) {
   const c = useThemeColors();
   const styles = useMemo(() => makeStyles(c), [c]);
 
-  const color = item.result ? RESULT_COLOR[item.result] : c.textSecondary;
+  const color = item.result ? resultColor(c, item.result) : c.textSecondary;
   return (
     <View style={styles.activityRow}>
       <View style={[styles.dot, { backgroundColor: color }]} />
@@ -171,7 +166,7 @@ export default function Dashboard() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.header}>
         <View>
-          <ThemedText type="default">Dashboard</ThemedText>
+          <ThemedText type="heading">Dashboard</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {profile?.name ?? 'Manager'}
           </ThemedText>
@@ -235,10 +230,10 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     backgroundColor: c.backgroundSelected,
     overflow: 'hidden',
   },
-  fill: { height: 8, borderRadius: 4, backgroundColor: '#208AEF' },
-  grounded: { color: '#D92D20' },
+  fill: { height: 8, borderRadius: 4, backgroundColor: c.primary },
+  grounded: { color: c.danger },
   completeBtn: {
-    backgroundColor: '#208AEF',
+    backgroundColor: c.primary,
     borderRadius: 10,
     paddingVertical: Spacing.three,
     alignItems: 'center',

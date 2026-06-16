@@ -31,9 +31,9 @@ export function SessionSummaryCard({ summary }: { summary: SessionSummary }) {
   return (
     <View style={styles.card}>
       <View style={styles.statRow}>
-        <Stat label="Clear" value={summary.clear} color="#12B76A" />
-        <Stat label="New damage" value={summary.new_damage} color="#F79009" />
-        <Stat label="Grounded" value={summary.grounded} color="#D92D20" />
+        <Stat label="Clear" value={summary.clear} color={c.success} />
+        <Stat label="New damage" value={summary.new_damage} color={c.warning} />
+        <Stat label="Grounded" value={summary.grounded} color={c.danger} />
       </View>
 
       <View style={styles.metaRow}>
@@ -64,5 +64,5 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
   statRow: { flexDirection: 'row', justifyContent: 'space-around' },
   stat: { alignItems: 'center', gap: 2 },
   metaRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  grounded: { color: '#D92D20' },
+  grounded: { color: c.danger },
 });

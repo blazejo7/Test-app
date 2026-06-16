@@ -224,7 +224,7 @@ export default function InspectionWizard() {
 const makeStyles = (c: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: c.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.three },
-  error: { color: '#D92D20' },
+  error: { color: c.danger },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -244,7 +244,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     borderRadius: 2,
     backgroundColor: c.backgroundSelected,
   },
-  progressBarActive: { backgroundColor: '#208AEF' },
+  progressBarActive: { backgroundColor: c.primary },
   body: { padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.three },
   footer: {
     flexDirection: 'row',
@@ -262,7 +262,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
   },
   btnSpacer: { flex: 1 },
   btnSecondary: { backgroundColor: c.backgroundElement },
-  btnPrimary: { backgroundColor: '#208AEF' },
+  btnPrimary: { backgroundColor: c.primary },
   btnPrimaryText: { color: '#fff' },
   btnDisabled: { opacity: 0.5 },
 });
