@@ -1,10 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
+import { notify } from '@/lib/dialogs';
 import {
   publishRota,
   setAssignment,
@@ -121,7 +122,7 @@ export default function ManagerRota() {
       await setAssignment(leadId, date, assigned);
       await queryClient.invalidateQueries({ queryKey: ['rota'] });
     } catch (e) {
-      Alert.alert('Assignment failed', e instanceof Error ? e.message : 'Unknown error');
+      notify('Assignment failed', e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setBusyKey(null);
     }
@@ -137,9 +138,9 @@ export default function ManagerRota() {
         date,
       });
       await queryClient.invalidateQueries({ queryKey: ['rota'] });
-      Alert.alert('Rota published', `${notified} lead${notified === 1 ? '' : 's'} notified.`);
+      notify('Rota published', `${notified} lead${notified === 1 ? '' : 's'} notified.`);
     } catch (e) {
-      Alert.alert('Publish failed', e instanceof Error ? e.message : 'Unknown error');
+      notify('Publish failed', e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setBusyKey(null);
     }

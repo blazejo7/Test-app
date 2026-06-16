@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -15,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
+import { notify } from '@/lib/dialogs';
 import { claimVan } from '@/lib/inspection';
 import { isLockExpired, minutesRemaining } from '@/lib/rules';
 import { releaseVan, useNow, useVans, type VanWithLock } from '@/lib/vans';
@@ -120,9 +120,10 @@ export default function Vans() {
     try {
       const inspectionId = await claimVan(vanId);
       await queryClient.invalidateQueries({ queryKey: ['vans'] });
+      await queryClient.invalidateQueries({ queryKey: ['inspections'] });
       router.push({ pathname: '/inspection/[id]', params: { id: inspectionId } });
     } catch (e) {
-      Alert.alert('Could not claim van', e instanceof Error ? e.message : 'Unknown error');
+      notify('Could not claim van', e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setBusyId(null);
     }
@@ -134,7 +135,7 @@ export default function Vans() {
       await releaseVan(vanId);
       await queryClient.invalidateQueries({ queryKey: ['vans'] });
     } catch (e) {
-      Alert.alert('Could not release van', e instanceof Error ? e.message : 'Unknown error');
+      notify('Could not release van', e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setBusyId(null);
     }

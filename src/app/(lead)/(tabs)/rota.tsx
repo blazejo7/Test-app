@@ -1,12 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChipSelect } from '@/components/inspection/chip-select';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
+import { notify } from '@/lib/dialogs';
 import { confirmRota, setAvailability, useMyRota, useRotaRealtime } from '@/lib/rota';
 import { rotaWindow } from '@/lib/rules';
 import type { Rota } from '@/types/database';
@@ -103,7 +104,7 @@ export default function LeadRota() {
       await fn();
       await queryClient.invalidateQueries({ queryKey: ['rota'] });
     } catch (e) {
-      Alert.alert('Rota update failed', e instanceof Error ? e.message : 'Unknown error');
+      notify('Rota update failed', e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setBusyDate(null);
     }

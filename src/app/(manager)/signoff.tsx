@@ -1,11 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SeverityBadge } from '@/components/damage/badges';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
+import { confirmAsync, notify } from '@/lib/dialogs';
 import {
   releaseGroundedVan,
   useManagerRealtime,
@@ -71,30 +72,24 @@ export default function SignOff() {
   const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  function onApprove(van: GroundedVan) {
-    Alert.alert(
+  async function onApprove(van: GroundedVan) {
+    const ok = await confirmAsync(
       'Release grounded van?',
       `${van.reg} will be cleared to go out once its groundable damage is signed off.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Approve',
-          style: 'destructive',
-          onPress: async () => {
-            setBusyId(van.id);
-            try {
-              await releaseGroundedVan(van.id);
-              await queryClient.invalidateQueries({ queryKey: ['signoff'] });
-              await queryClient.invalidateQueries({ queryKey: ['vans'] });
-            } catch (e) {
-              Alert.alert('Release failed', e instanceof Error ? e.message : 'Unknown error');
-            } finally {
-              setBusyId(null);
-            }
-          },
-        },
-      ],
+      'Approve',
+      true,
     );
+    if (!ok) return;
+    setBusyId(van.id);
+    try {
+      await releaseGroundedVan(van.id);
+      await queryClient.invalidateQueries({ queryKey: ['signoff'] });
+      await queryClient.invalidateQueries({ queryKey: ['vans'] });
+    } catch (e) {
+      notify('Release failed', e instanceof Error ? e.message : 'Unknown error');
+    } finally {
+      setBusyId(null);
+    }
   }
 
   return (

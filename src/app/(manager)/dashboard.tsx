@@ -1,12 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SessionSummaryCard } from '@/components/manager/session-summary-card';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
+import { confirmAsync, notify } from '@/lib/dialogs';
 import {
   completeSession,
   useManagerRealtime,
@@ -58,28 +59,22 @@ function SessionPanel() {
     ? session.summary
     : buildSessionSummary(inspections ?? [], session.total_vans);
 
-  function onComplete() {
-    Alert.alert(
+  async function onComplete() {
+    const ok = await confirmAsync(
       "Complete today's check?",
       'This finalises the daily report and notifies managers. A session cannot be reopened.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Complete',
-          onPress: async () => {
-            setCompleting(true);
-            try {
-              await completeSession(session!.id);
-              await queryClient.invalidateQueries({ queryKey: ['session'] });
-            } catch (e) {
-              Alert.alert('Could not complete', e instanceof Error ? e.message : 'Unknown error');
-            } finally {
-              setCompleting(false);
-            }
-          },
-        },
-      ],
+      'Complete',
     );
+    if (!ok) return;
+    setCompleting(true);
+    try {
+      await completeSession(session!.id);
+      await queryClient.invalidateQueries({ queryKey: ['session'] });
+    } catch (e) {
+      notify('Could not complete', e instanceof Error ? e.message : 'Unknown error');
+    } finally {
+      setCompleting(false);
+    }
   }
 
   return (

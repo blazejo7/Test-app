@@ -1,15 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { notify } from '@/lib/dialogs';
 
 import {
   StepKnownDamage,
@@ -77,11 +72,10 @@ export default function InspectionWizard() {
       });
       await queryClient.invalidateQueries({ queryKey: ['vans'] });
       await queryClient.invalidateQueries({ queryKey: ['inspections'] });
-      Alert.alert('Inspection submitted', `Result: ${result.replace('_', ' ')}`, [
-        { text: 'Done', onPress: () => router.back() },
-      ]);
+      notify('Inspection submitted', `Result: ${result.replace('_', ' ')}`);
+      router.back();
     } catch (e) {
-      Alert.alert('Submit failed', e instanceof Error ? e.message : 'Unknown error');
+      notify('Submit failed', e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setSubmitting(false);
     }
@@ -156,6 +150,7 @@ export default function InspectionWizard() {
         )}
         {step === 2 && profile && vanId && (
           <StepNewDamage
+            zones={zones}
             items={newDamage}
             onAdd={(item) => setNewDamage((d) => [...d, item])}
             onRemove={(index) => setNewDamage((d) => d.filter((_, i) => i !== index))}
