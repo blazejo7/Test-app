@@ -89,6 +89,29 @@ Password for all three: `password123`.
 phone and as the manager elsewhere — e.g. run `npm run web` on your computer, or
 use a second device.
 
+## Native dev build (real push notifications, and no Expo Go SDK limit)
+
+Expo Go only runs the SDK it ships with, and push notifications don't fire inside
+Expo Go. A **development build** is a small custom version of the app that embeds
+the exact SDK and native modules — it removes the Expo Go SDK constraint **and**
+enables real Expo push tokens. It's built in the cloud with EAS (`eas.json` is
+already in the repo), so you don't need Xcode/Android Studio.
+
+```bash
+npm install -g eas-cli
+eas login                 # free Expo account
+eas init                  # creates the project + writes extra.eas.projectId into app.json
+eas build --profile development --platform ios   # or: --platform android
+```
+
+- **Android:** install the resulting `.apk` straight onto your phone — done.
+- **iOS:** installing on a physical iPhone requires the device be registered to an
+  Apple Developer account (a paid requirement from Apple, not the app). `eas device:create`
+  walks you through it. Android is the easier route to try push quickly.
+
+Once installed, the app registers an Expo push token on login (stored in
+`push_tokens`), and publishing the rota sends a real push to assigned leads.
+
 ## Troubleshooting
 
 - **Red "Missing Supabase config" screen** — `.env` wasn't picked up. Stop Expo and

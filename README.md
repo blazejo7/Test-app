@@ -87,7 +87,10 @@ receipt), full DB schema with RLS, domain rules + tests.
 All 8 features from the spec are built. Design rationale and the corrected data
 model are in [`docs/SPEC.md`](docs/SPEC.md).
 
-> Two pieces need a physical device and can't be exercised headlessly: damage
-> photo capture/upload and Expo push delivery. Both are wired up; their
-> server-side halves (storage bucket + RLS, push-token storage + send) are
-> verified. In-app notifications are the authoritative channel for v1.
+> **Verified against the real backend:** the damage-photo pipeline (upload →
+> fleet-scoped RLS → signed-URL retrieval) and the push path (token registration
+> under RLS → `sendExpoPush` reaching the Expo Push Service). The only parts that
+> need a physical device are the native camera/library *picker UI* and receiving a
+> real push (which needs a real Expo push token from an EAS dev build — see
+> [`docs/RUNNING-ON-PHONE.md`](docs/RUNNING-ON-PHONE.md)). In-app notifications are
+> the authoritative channel regardless.
