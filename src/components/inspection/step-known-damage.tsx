@@ -1,8 +1,11 @@
 import { StyleSheet, TextInput, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { ChipSelect } from '@/components/inspection/chip-select';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import type { ConfirmationOutcome, DamageReport } from '@/types/database';
 
 export interface ConfirmationDraft {
@@ -24,6 +27,9 @@ export function StepKnownDamage({
   confirmations: Record<string, ConfirmationDraft>;
   onChange: (id: string, draft: ConfirmationDraft) => void;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   if (knownDamage.length === 0) {
     return (
       <View style={styles.empty}>
@@ -60,7 +66,7 @@ export function StepKnownDamage({
             {draft?.outcome === 'worse' ? (
               <TextInput
                 placeholder="What changed? (optional)"
-                placeholderTextColor={Colors.light.textSecondary}
+                placeholderTextColor={c.textSecondary}
                 value={draft.note}
                 onChangeText={(note) => onChange(d.id, { outcome: 'worse', note })}
                 style={styles.note}
@@ -73,21 +79,21 @@ export function StepKnownDamage({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
   empty: { paddingVertical: Spacing.five, alignItems: 'center' },
   list: { gap: Spacing.three },
   card: {
     gap: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.three,
   },
   note: {
     borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    borderColor: c.backgroundSelected,
     borderRadius: 8,
     paddingHorizontal: Spacing.two,
     paddingVertical: Spacing.two,
-    color: Colors.light.text,
+    color: c.text,
   },
 });

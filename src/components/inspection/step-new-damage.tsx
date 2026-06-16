@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { ChipSelect } from '@/components/inspection/chip-select';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { notify } from '@/lib/dialogs';
 import {
   DAMAGE_TYPES,
@@ -32,6 +34,9 @@ export function StepNewDamage({
   onRemove: (index: number) => void;
   photoContext: PhotoContext;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const [activeZone, setActiveZone] = useState<DamageZone | null>(null);
   const [showAllZones, setShowAllZones] = useState(false);
   const [type, setType] = useState<DamageType | null>(null);
@@ -139,7 +144,7 @@ export function StepNewDamage({
           <ChipSelect options={SEVERITIES} selected={severity} onSelect={setSeverity} />
           <TextInput
             placeholder="Description (optional)"
-            placeholderTextColor={Colors.light.textSecondary}
+            placeholderTextColor={c.textSecondary}
             value={description}
             onChangeText={setDescription}
             style={styles.input}
@@ -174,7 +179,7 @@ export function StepNewDamage({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
   container: { gap: Spacing.three },
   center: { textAlign: 'center' },
   flex: { flex: 1 },
@@ -184,9 +189,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    borderColor: c.backgroundSelected,
   },
   bubbleActive: { backgroundColor: '#208AEF', borderColor: '#208AEF' },
   bubbleTextActive: { color: '#fff' },
@@ -195,7 +200,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 10,
     padding: Spacing.three,
   },
@@ -203,26 +208,26 @@ const styles = StyleSheet.create({
   form: {
     gap: Spacing.two,
     borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    borderColor: c.backgroundSelected,
     borderRadius: 12,
     padding: Spacing.three,
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    borderColor: c.backgroundSelected,
     borderRadius: 8,
     paddingHorizontal: Spacing.two,
     paddingVertical: Spacing.two,
-    color: Colors.light.text,
+    color: c.text,
   },
   photoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   photoBtn: {
     borderRadius: 8,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    borderColor: c.backgroundSelected,
   },
   formActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.three, marginTop: Spacing.one },
   cancelBtn: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.two },
@@ -232,6 +237,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
   },
-  saveBtnDisabled: { backgroundColor: Colors.light.backgroundSelected },
+  saveBtnDisabled: { backgroundColor: c.backgroundSelected },
   saveText: { color: '#fff' },
 });

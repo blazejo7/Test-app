@@ -1,8 +1,11 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 
 /**
  * Placeholder for screens that are on the roadmap but not built in the scaffold.
@@ -17,6 +20,9 @@ export function ScreenStub({
   description: string;
   phase: string;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <View style={styles.body}>
@@ -34,8 +40,8 @@ export function ScreenStub({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   body: {
     flex: 1,
     alignItems: 'center',
@@ -45,10 +51,10 @@ const styles = StyleSheet.create({
   },
   desc: { textAlign: 'center' },
   badge: {
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 999,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
   },
-  badgeText: { color: Colors.light.textSecondary },
+  badgeText: { color: c.textSecondary },
 });

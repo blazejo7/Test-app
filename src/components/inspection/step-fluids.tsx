@@ -1,7 +1,10 @@
 import { StyleSheet, TextInput, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { evaluateFluidLevels, FLUID_LOW_THRESHOLD, type FluidKey } from '@/lib/rules';
 import type { FluidLevels } from '@/types/database';
 
@@ -24,6 +27,9 @@ export function StepFluids({
   fluids: FluidLevels;
   onChange: (key: FluidKey, value: number) => void;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const evaluation = evaluateFluidLevels(fluids);
 
   return (
@@ -57,13 +63,13 @@ export function StepFluids({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
   list: { gap: Spacing.three },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.three,
   },
@@ -71,13 +77,13 @@ const styles = StyleSheet.create({
   lowText: { color: '#D92D20' },
   input: {
     borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    borderColor: c.backgroundSelected,
     borderRadius: 8,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     minWidth: 64,
     textAlign: 'center',
-    color: Colors.light.text,
+    color: c.text,
   },
   inputLow: { borderColor: '#D92D20' },
 });

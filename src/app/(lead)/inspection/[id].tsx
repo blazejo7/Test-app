@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -15,7 +15,9 @@ import { StepFluids } from '@/components/inspection/step-fluids';
 import { StepReview } from '@/components/inspection/step-review';
 import { StepWalkaround } from '@/components/inspection/step-walkaround';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import {
   submitInspection,
@@ -30,6 +32,9 @@ import type { DamageZone, FluidLevels } from '@/types/database';
 const STEPS = ['Known damage', 'Walkaround', 'New damage', 'Fluids', 'Review'];
 
 export default function InspectionWizard() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
   const queryClient = useQueryClient();
@@ -216,8 +221,8 @@ export default function InspectionWizard() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.three },
   error: { color: '#D92D20' },
   header: {
@@ -237,7 +242,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.light.backgroundSelected,
+    backgroundColor: c.backgroundSelected,
   },
   progressBarActive: { backgroundColor: '#208AEF' },
   body: { padding: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.three },
@@ -246,7 +251,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     padding: Spacing.three,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: Colors.light.backgroundSelected,
+    borderTopColor: c.backgroundSelected,
   },
   btn: {
     flex: 1,
@@ -256,7 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnSpacer: { flex: 1 },
-  btnSecondary: { backgroundColor: Colors.light.backgroundElement },
+  btnSecondary: { backgroundColor: c.backgroundElement },
   btnPrimary: { backgroundColor: '#208AEF' },
   btnPrimaryText: { color: '#fff' },
   btnDisabled: { opacity: 0.5 },

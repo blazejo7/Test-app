@@ -1,9 +1,11 @@
 import { Image } from 'expo-image';
-import { useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { signedPhotoUrl } from '@/lib/photos';
 
 /**
@@ -11,6 +13,9 @@ import { signedPhotoUrl } from '@/lib/photos';
  * horizontal strip. Photos are immutable once an inspection is submitted.
  */
 export function PhotoGallery({ paths }: { paths: string[] }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const [urls, setUrls] = useState<string[]>([]);
 
   useEffect(() => {
@@ -47,8 +52,8 @@ export function PhotoGallery({ paths }: { paths: string[] }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
   row: { gap: Spacing.two },
-  thumb: { width: 120, height: 120, borderRadius: 10, backgroundColor: Colors.light.backgroundElement },
+  thumb: { width: 120, height: 120, borderRadius: 10, backgroundColor: c.backgroundElement },
   placeholder: { alignItems: 'center', justifyContent: 'center' },
 });

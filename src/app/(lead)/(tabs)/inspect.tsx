@@ -1,12 +1,18 @@
 import { router } from 'expo-router';
+import { useMemo } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { useInProgressInspections } from '@/lib/inspection';
 
 export default function Inspect() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const { data, isLoading } = useInProgressInspections();
 
   return (
@@ -58,8 +64,8 @@ export default function Inspect() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   header: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.three, gap: 2 },
   list: { paddingHorizontal: Spacing.three, gap: Spacing.two },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.five },
@@ -67,7 +73,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.three,
   },

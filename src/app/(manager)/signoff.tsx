@@ -1,11 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SeverityBadge } from '@/components/damage/badges';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { confirmAsync, notify } from '@/lib/dialogs';
 import {
   releaseGroundedVan,
@@ -23,6 +25,9 @@ function QueueCard({
   onApprove: (van: GroundedVan) => void;
   busy: boolean;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHead}>
@@ -67,6 +72,9 @@ function QueueCard({
 }
 
 export default function SignOff() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   useManagerRealtime();
   const { data, isLoading, isError, error } = useSignoffQueue();
   const queryClient = useQueryClient();
@@ -132,15 +140,15 @@ export default function SignOff() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   flex: { flex: 1 },
   header: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.three, gap: 2 },
   list: { paddingHorizontal: Spacing.three, gap: Spacing.three, paddingBottom: Spacing.five },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.five },
   card: {
     gap: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.three,
   },

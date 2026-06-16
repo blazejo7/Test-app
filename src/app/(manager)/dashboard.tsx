@@ -1,11 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SessionSummaryCard } from '@/components/manager/session-summary-card';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { confirmAsync, notify } from '@/lib/dialogs';
 import {
@@ -27,6 +29,9 @@ const RESULT_COLOR: Record<InspectionResult, string> = {
 };
 
 function SessionPanel() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const { data: session, isLoading } = useTodaySession();
   const { data: inspections } = useSessionInspections(session?.id);
   const { data: queue } = useSignoffQueue();
@@ -132,7 +137,10 @@ function SessionPanel() {
 }
 
 function ActivityItem({ item }: { item: ActivityRow }) {
-  const color = item.result ? RESULT_COLOR[item.result] : Colors.light.textSecondary;
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
+  const color = item.result ? RESULT_COLOR[item.result] : c.textSecondary;
   return (
     <View style={styles.activityRow}>
       <View style={[styles.dot, { backgroundColor: color }]} />
@@ -152,6 +160,9 @@ function ActivityItem({ item }: { item: ActivityRow }) {
 }
 
 export default function Dashboard() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const { profile, signOut } = useAuth();
   useManagerRealtime();
   const { data: activity, isLoading } = useRecentActivity();
@@ -198,8 +209,8 @@ export default function Dashboard() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   flex: { flex: 1 },
   header: {
     flexDirection: 'row',
@@ -213,7 +224,7 @@ const styles = StyleSheet.create({
   panel: { gap: Spacing.two },
   card: {
     gap: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.four,
   },
@@ -221,7 +232,7 @@ const styles = StyleSheet.create({
   track: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.light.backgroundSelected,
+    backgroundColor: c.backgroundSelected,
     overflow: 'hidden',
   },
   fill: { height: 8, borderRadius: 4, backgroundColor: '#208AEF' },
@@ -241,7 +252,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 10,
     padding: Spacing.three,
   },

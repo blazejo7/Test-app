@@ -1,21 +1,18 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
 
+import { Logo } from '@/components/brand/logo';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Screen } from '@/components/ui/screen';
+import { Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
+import { useThemeColors } from '@/lib/theme';
 
 export default function Login() {
   const { signIn } = useAuth();
+  const c = useThemeColors();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -27,99 +24,76 @@ export default function Login() {
     const { error: signInError } = await signIn(email.trim(), password);
     setSubmitting(false);
     if (signInError) setError(signInError);
-    // On success the auth gate redirects automatically.
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <Screen>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.container}
       >
-        <View style={styles.header}>
-          <ThemedText type="subtitle">FleetFlow</ThemedText>
+        <View style={styles.brand}>
+          <Logo size={56} />
           <ThemedText type="small" themeColor="textSecondary">
             Daily fleet inspections
           </ThemedText>
         </View>
 
-        <View style={styles.form}>
+        <Card style={styles.form}>
+          <ThemedText type="smallBold" themeColor="textSecondary">
+            Email
+          </ThemedText>
           <TextInput
-            placeholder="Email"
-            placeholderTextColor={Colors.light.textSecondary}
+            placeholder="you@fleet.test"
+            placeholderTextColor={c.textSecondary}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
             value={email}
             onChangeText={setEmail}
-            style={styles.input}
+            style={[styles.input, { backgroundColor: c.surfaceAlt, borderColor: c.border, color: c.text }]}
           />
+          <ThemedText type="smallBold" themeColor="textSecondary">
+            Password
+          </ThemedText>
           <TextInput
-            placeholder="Password"
-            placeholderTextColor={Colors.light.textSecondary}
+            placeholder="••••••••"
+            placeholderTextColor={c.textSecondary}
             secureTextEntry
             value={password}
             onChangeText={setPassword}
-            style={styles.input}
+            style={[styles.input, { backgroundColor: c.surfaceAlt, borderColor: c.border, color: c.text }]}
           />
 
           {error ? (
-            <ThemedText type="small" style={styles.error}>
+            <ThemedText type="small" style={{ color: c.danger }}>
               {error}
             </ThemedText>
           ) : null}
 
-          <TouchableOpacity
-            style={[styles.button, submitting && styles.buttonDisabled]}
-            onPress={onSubmit}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <ThemedText type="smallBold" style={styles.buttonText}>
-                Sign in
-              </ThemedText>
-            )}
-          </TouchableOpacity>
-        </View>
+          <Button label="Sign in" onPress={onSubmit} loading={submitting} style={styles.button} />
+        </Card>
 
         <ThemedText type="small" themeColor="textSecondary" style={styles.hint}>
-          Seeded demo logins are listed in supabase/seed.sql.
+          Demo logins are in supabase/seed.sql
         </ThemedText>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
-  container: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    justifyContent: 'center',
-    gap: Spacing.five,
-  },
-  header: { gap: Spacing.one, alignItems: 'center' },
-  form: { gap: Spacing.three },
+  container: { flex: 1, paddingHorizontal: Spacing.four, justifyContent: 'center', gap: Spacing.five },
+  brand: { alignItems: 'center', gap: Spacing.two },
+  form: { gap: Spacing.two },
   input: {
-    borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
-    backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.md,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
     fontSize: 16,
-    color: Colors.light.text,
+    marginBottom: Spacing.one,
   },
-  button: {
-    backgroundColor: '#208AEF',
-    borderRadius: 10,
-    paddingVertical: Spacing.three,
-    alignItems: 'center',
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff' },
-  error: { color: '#D92D20' },
+  button: { marginTop: Spacing.three },
   hint: { textAlign: 'center' },
 });

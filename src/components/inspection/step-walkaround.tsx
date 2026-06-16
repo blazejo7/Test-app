@@ -1,8 +1,11 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { ChipSelect } from '@/components/inspection/chip-select';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { ZONES, type ZoneStatus } from '@/lib/inspection';
 import type { DamageZone } from '@/types/database';
 
@@ -18,6 +21,9 @@ export function StepWalkaround({
   zones: Record<string, ZoneStatus>;
   onSet: (zone: DamageZone, status: ZoneStatus) => void;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   return (
     <View style={styles.list}>
       <ThemedText type="small" themeColor="textSecondary">
@@ -37,11 +43,11 @@ export function StepWalkaround({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
   list: { gap: Spacing.three },
   row: {
     gap: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.three,
   },

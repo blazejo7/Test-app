@@ -5,7 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChipSelect } from '@/components/inspection/chip-select';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { notify } from '@/lib/dialogs';
 import { confirmRota, setAvailability, useMyRota, useRotaRealtime } from '@/lib/rota';
@@ -38,6 +40,9 @@ function DayCard({
   onConfirm: (date: string) => void;
   busy: boolean;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const assignedPublished = row?.status === 'assigned' && row.published_at;
 
   return (
@@ -91,6 +96,9 @@ function DayCard({
 }
 
 export default function LeadRota() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const { profile } = useAuth();
   useRotaRealtime();
   const dates = useMemo(() => rotaWindow(), []);
@@ -141,14 +149,14 @@ export default function LeadRota() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   header: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.three, gap: 2 },
   list: { padding: Spacing.three, gap: Spacing.three },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.five },
   card: {
     gap: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.three,
   },

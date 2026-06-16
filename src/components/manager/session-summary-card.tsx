@@ -1,10 +1,16 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import type { SessionSummary } from '@/types/database';
 
 function Stat({ label, value, color }: { label: string; value: number; color?: string }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   return (
     <View style={styles.stat}>
       <ThemedText type="subtitle" style={color ? { color } : undefined}>
@@ -19,6 +25,9 @@ function Stat({ label, value, color }: { label: string; value: number; color?: s
 
 /** Renders an end-of-day summary — used both as a live preview and the stored snapshot. */
 export function SessionSummaryCard({ summary }: { summary: SessionSummary }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   return (
     <View style={styles.card}>
       <View style={styles.statRow}>
@@ -45,10 +54,10 @@ export function SessionSummaryCard({ summary }: { summary: SessionSummary }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
     gap: Spacing.three,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.four,
   },

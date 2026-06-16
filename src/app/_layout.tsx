@@ -6,6 +6,7 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { registerForPush } from '@/lib/push';
+import { ThemeProvider, useThemeColors, useThemeMode } from '@/lib/theme';
 
 const queryClient = new QueryClient();
 
@@ -45,7 +46,6 @@ function useAuthGate() {
     } else if (role === 'lead' && group !== '(lead)') {
       router.replace('/vans');
     } else if (!role && !inAuthGroup) {
-      // Signed in but no profile row yet — bounce to login.
       router.replace('/login');
     }
   }, [loading, session, profile, segments, router]);
@@ -55,18 +55,19 @@ function useAuthGate() {
 
 function RootNavigator() {
   const loading = useAuthGate();
+  const c = useThemeColors();
   usePushRegistration();
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.background }}>
+        <ActivityIndicator color={c.primary} />
       </View>
     );
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }}>
       <Stack.Screen name="(auth)/login" />
       <Stack.Screen name="(lead)" />
       <Stack.Screen name="(manager)" />
@@ -74,13 +75,20 @@ function RootNavigator() {
   );
 }
 
+function ThemedStatusBar() {
+  const { scheme } = useThemeMode();
+  return <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />;
+}
+
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <StatusBar style="auto" />
-        <RootNavigator />
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ThemedStatusBar />
+          <RootNavigator />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

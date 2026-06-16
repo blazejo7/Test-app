@@ -1,7 +1,8 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 
 export interface ChipOption<T extends string> {
   value: T;
@@ -17,6 +18,7 @@ export function ChipSelect<T extends string>({
   selected: T | null;
   onSelect: (value: T) => void;
 }) {
+  const c = useThemeColors();
   return (
     <View style={styles.row}>
       {options.map((opt) => {
@@ -25,12 +27,16 @@ export function ChipSelect<T extends string>({
           <TouchableOpacity
             key={opt.value}
             onPress={() => onSelect(opt.value)}
-            style={[styles.chip, active && styles.chipActive]}
+            activeOpacity={0.8}
+            style={[
+              styles.chip,
+              {
+                backgroundColor: active ? c.primary : c.surfaceAlt,
+                borderColor: active ? c.primary : c.border,
+              },
+            ]}
           >
-            <ThemedText
-              type="small"
-              style={active ? styles.chipTextActive : undefined}
-            >
+            <ThemedText type="small" style={{ color: active ? c.onPrimary : c.text }}>
               {opt.label}
             </ThemedText>
           </TouchableOpacity>
@@ -43,13 +49,9 @@ export function ChipSelect<T extends string>({
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   chip: {
-    borderRadius: 999,
+    borderRadius: Radius.pill,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
-    backgroundColor: Colors.light.backgroundElement,
-    borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    paddingVertical: Spacing.one + 2,
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  chipActive: { backgroundColor: '#208AEF', borderColor: '#208AEF' },
-  chipTextActive: { color: '#fff' },
 });

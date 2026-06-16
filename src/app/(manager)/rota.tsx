@@ -4,7 +4,9 @@ import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { notify } from '@/lib/dialogs';
 import {
   publishRota,
@@ -46,6 +48,9 @@ function DaySection({
   onPublish: (date: string) => void;
   busyKey: string | null;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const rows = grid.leads.map((lead) => ({ lead, row: grid.rota[lead.id]?.[date] }));
   const assignedCount = rows.filter((r) => r.row?.status === 'assigned').length;
   const confirmedCount = rows.filter((r) => r.row?.status === 'assigned' && r.row.confirmed).length;
@@ -110,6 +115,9 @@ function DaySection({
 }
 
 export default function ManagerRota() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   useRotaRealtime();
   const dates = useMemo(() => rotaWindow(), []);
   const { data: grid, isLoading } = useRotaGrid(dates);
@@ -177,15 +185,15 @@ export default function ManagerRota() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   flex: { flex: 1 },
   header: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.three, gap: 2 },
   list: { padding: Spacing.three, gap: Spacing.three },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: Spacing.five },
   section: {
     gap: Spacing.two,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.three,
   },
@@ -206,7 +214,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.light.background,
+    backgroundColor: c.background,
     borderRadius: 10,
     padding: Spacing.three,
   },
@@ -217,7 +225,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
     borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    borderColor: c.backgroundSelected,
   },
   assignBtnActive: { backgroundColor: '#208AEF', borderColor: '#208AEF' },
   assignTextActive: { color: '#fff' },

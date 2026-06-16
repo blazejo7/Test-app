@@ -1,14 +1,20 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useMemo } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SeverityBadge, StatusBadge } from '@/components/damage/badges';
 import { PhotoGallery } from '@/components/damage/photo-gallery';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { useDamageReport } from '@/lib/damage';
 
 export default function DamageDetail() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data, isLoading, isError } = useDamageReport(id);
 
@@ -104,6 +110,9 @@ export default function DamageDetail() {
 }
 
 function Field({ label, value }: { label: string; value: string }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   return (
     <View style={styles.field}>
       <ThemedText type="small" themeColor="textSecondary">
@@ -114,8 +123,8 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.three },
   error: { color: '#D92D20' },
   header: {
@@ -131,13 +140,13 @@ const styles = StyleSheet.create({
   field: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 10,
     padding: Spacing.three,
   },
   historyRow: {
     gap: 2,
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 10,
     padding: Spacing.three,
   },

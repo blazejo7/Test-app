@@ -1,7 +1,10 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { ZONES, type NewDamageInput, type ZoneStatus } from '@/lib/inspection';
 import { deriveVanStatus, evaluateFluidLevels } from '@/lib/rules';
 import type { DamageReport, FluidLevels, InspectionResult } from '@/types/database';
@@ -37,6 +40,9 @@ export function StepReview({
   fluids: FluidLevels;
   knownDamage: DamageReport[];
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const result = predictResult(knownDamage, newDamage);
   const meta = RESULT_META[result];
   const lowFluids = evaluateFluidLevels(fluids).low;
@@ -67,6 +73,9 @@ export function StepReview({
 }
 
 function Row({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   return (
     <View style={styles.row}>
       <ThemedText type="small" themeColor="textSecondary">
@@ -79,7 +88,7 @@ function Row({ label, value, warn }: { label: string; value: string; warn?: bool
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
   list: { gap: Spacing.two },
   resultBanner: {
     borderRadius: 12,
@@ -91,7 +100,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 10,
     padding: Spacing.three,
   },

@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -12,7 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import type { ThemeColors } from '@/constants/theme';
+import { useThemeColors } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { notify } from '@/lib/dialogs';
 import { claimVan } from '@/lib/inspection';
@@ -27,6 +29,9 @@ const STATUS_META: Record<VanStatus, { label: string; color: string }> = {
 };
 
 function StatusPill({ status }: { status: VanStatus }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const meta = STATUS_META[status];
   return (
     <View style={[styles.pill, { backgroundColor: meta.color }]}>
@@ -52,6 +57,9 @@ function VanRow({
   onRelease: (vanId: string) => void;
   busy: boolean;
 }) {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const activeLock = van.lock && !isLockExpired(van.lock, now) ? van.lock : null;
   const heldByMe = activeLock?.locked_by === currentUserId;
   const lockedByOther = !!activeLock && !heldByMe;
@@ -109,6 +117,9 @@ function VanRow({
 }
 
 export default function Vans() {
+  const c = useThemeColors();
+  const styles = useMemo(() => makeStyles(c), [c]);
+
   const { profile, signOut } = useAuth();
   const { data, isLoading, isError, error, refetch, isRefetching } = useVans();
   const queryClient = useQueryClient();
@@ -198,8 +209,8 @@ export default function Vans() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: c.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -213,7 +224,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: c.backgroundElement,
     borderRadius: 12,
     padding: Spacing.three,
   },
@@ -230,14 +241,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
   },
-  claimBtnDisabled: { backgroundColor: Colors.light.backgroundSelected },
+  claimBtnDisabled: { backgroundColor: c.backgroundSelected },
   claimText: { color: '#fff' },
   releaseBtn: {
     borderRadius: 8,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
     borderWidth: 1,
-    borderColor: Colors.light.backgroundSelected,
+    borderColor: c.backgroundSelected,
   },
   releaseText: { color: '#D92D20' },
   error: { color: '#D92D20' },
